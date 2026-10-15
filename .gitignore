@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# 打包产物
+build/
+dist/
+*.spec
+
+# 运行时配置（含各人自己的上游地址等，不入库）
+config/
+
+# 日志
+*.log
+
+# 编辑器 / 系统
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# 本机工作区数据（含对话记录、记忆等私有内容）
+.workbuddy/
