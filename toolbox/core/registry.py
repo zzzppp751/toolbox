@@ -1,6 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""工具自动发现：扫描 tools/ 包，收集所有 BaseTool 子类。"""
+"""工具发现：收集 tools/ 包下的所有 BaseTool 子类。
+
+两种发现方式并用：
+  1. 显式清单 —— 读取 tools.TOOL_MODULES（打包成 exe 后唯一可靠的方式）；
+  2. 自动扫描 —— 用 pkgutil 扫描 tools/ 目录（源码运行时方便，免登记）。
+两者结果取并集，因此新增工具即使忘了登记，源码运行时也能被看到。
+"""
 
 import importlib
 import inspect
@@ -12,15 +18,39 @@ from core.base import BaseTool
 TOOLS_PACKAGE = "tools"
 
 
-def discover_tools(package_name=TOOLS_PACKAGE):
-    """扫描指定包下的所有模块，返回其中定义的 BaseTool 子类（已排序）。
+def _iter_module_names(package):
+    """返回待扫描的模块名集合（显式清单 ∪ 自动扫描结果）。"""
+    names = set()
 
-    单个工具导入失败不会影响其它工具，错误会打印出来便于排查。
+    declared = getattr(package, "TOOL_MODULES", None) or []
+    names.update(str(n).strip() for n in declared if str(n).strip())
+
+    # 自动扫描：源码运行时可用；打包成 exe 后 pkgutil 无法枚举 PYZ，失败可忽略
+    try:
+        for _, modname, _ in pkgutil.iter_modules(package.__path__):
+            if modname.startswith("_"):
+                continue
+            names.add(modname)
+    except Exception:
+        pass
+
+    return sorted(names)
+
+
+def discover_tools(package_name=TOOLS_PACKAGE):
+    """返回所有已发现工具类（按 order 排序）。
+
+    单个工具导入失败不影响其它工具，错误会打印出来便于排查。
     """
-    package = importlib.import_module(package_name)
+    try:
+        package = importlib.import_module(package_name)
+    except Exception:
+        traceback.print_exc()
+        return []
+
     found = {}
 
-    for _, modname, _ in pkgutil.iter_modules(package.__path__):
+    for modname in _iter_module_names(package):
         full = "%s.%s" % (package_name, modname)
         try:
             module = importlib.import_module(full)

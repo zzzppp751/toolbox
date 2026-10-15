@@ -82,14 +82,25 @@ class MyTool(BaseTool):
 
 日志用 `self.log("...")`（线程安全，输出到底部共享日志）；配置文件路径用 `self.context.config_path("my_tool")`。
 
+> **记得登记**：把模块名加入 `toolbox/tools/__init__.py` 的 `TOOL_MODULES` 列表。
+> 源码运行时即使不登记也能靠自动扫描发现，但打包成 exe 后必须靠这份清单才能被收录。
+
 ## 打包为 exe
 
 ```bash
 py -m pip install pyinstaller
-py -m PyInstaller -F -w --name Toolbox toolbox/main.py
+py build_exe.py                    # 生成 dist/Toolbox.exe
+py build_exe.py --name 工具箱       # 自定义名字
+py build_exe.py --console          # 保留控制台，便于看报错
 ```
 
-产物在 `dist/Toolbox.exe`。
+产物在 `dist/<名字>.exe`，单文件、免装 Python。
+
+> **为什么不用直接跑 PyInstaller？**
+> 工具箱的功能是运行时动态加载的，PyInstaller 的静态分析发现不了，
+> 必须显式声明 `--hidden-import`。`build_exe.py` 会自动读取 `TOOL_MODULES`
+> 清单逐个加上，以后新增工具无需改动打包命令。
+> 另外 PyInstaller 冻结后 `pkgutil` 无法枚举已打包模块，所以清单是打包版的唯一可靠来源。
 
 ## 其它
 
