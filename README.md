@@ -15,16 +15,22 @@
 - **插件式扩展**：新增功能 = 在 `tools/` 下加一个模块。
 - **界面与逻辑分离**：代理引擎不依赖界面，可被 Web / 命令行等其它前端复用。
 - **配置隔离**：每个工具独立配置文件，互不干扰。
+- **统一主题**：配色、字体、控件样式集中在 `core/theme.py`，改一处全局换肤。
+- **可调分栏**：工具面板与运行日志之间的分界线可以拖动。
 
 ## 目录结构
 
 ```
 toolbox/
-├─ main.py                     主程序：功能列表 + 面板 + 共享日志
+├─ main.py                     主程序：品牌区 + 功能列表 + 面板 + 共享日志
 ├─ run_toolbox.bat             双击启动（Windows）
+├─ assets/                     图标资源
+│  ├─ icon.ico / icon.png      应用图标（窗口 / 任务栏 / exe）
+│  └─ make_icon.py             图标生成脚本（改配色在这里改）
 ├─ core/
-│  ├─ base.py                  BaseTool 基类 + ToolContext
-│  └─ registry.py              按清单 + 自动扫描发现工具
+│  ├─ base.py                  BaseTool 基类 + ToolContext + 资源路径
+│  ├─ registry.py              按清单 + 自动扫描发现工具
+│  └─ theme.py                 统一主题：配色 / 字体 / 控件样式
 └─ tools/                      每个子目录 = 一个功能插件
    ├─ __init__.py              TOOL_MODULES 工具清单（新增工具要登记）
    ├─ proxy/                   本地反向代理

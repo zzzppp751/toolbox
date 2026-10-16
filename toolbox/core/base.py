@@ -15,7 +15,7 @@ import sys
 
 
 def get_app_dir():
-    """返回应用根目录（配置、资源放这里）。
+    """返回应用根目录（配置放这里）。
 
     打包成单文件 exe 后，__file__ 指向临时解压目录（退出即清理），
     因此这种情况改用 exe 自身所在目录。
@@ -23,6 +23,19 @@ def get_app_dir():
     if getattr(sys, "frozen", False):
         return os.path.dirname(sys.executable)
     return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+
+def resource_path(relative):
+    """返回随程序分发的资源文件（如图标）的绝对路径。
+
+    打包后资源会被解压到 sys._MEIPASS，源码运行时则相对应用目录寻找。
+    """
+    base = getattr(sys, "_MEIPASS", None)
+    if base:
+        candidate = os.path.join(base, relative)
+        if os.path.exists(candidate):
+            return candidate
+    return os.path.join(get_app_dir(), relative)
 
 
 class ToolContext:

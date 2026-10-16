@@ -49,7 +49,7 @@ class ProxyTool(BaseTool):
         rules = ttk.LabelFrame(f, text="转发规则（本地路径前缀 → 上游地址）")
         rules.pack(fill="both", expand=True, padx=6, pady=6)
         self.tree = ttk.Treeview(rules, columns=("local", "upstream"),
-                                 show="headings", height=6)
+                                 show="headings", height=5)
         self.tree.heading("local", text="本地路径前缀")
         self.tree.heading("upstream", text="上游地址")
         self.tree.column("local", width=150, anchor="w")
@@ -89,15 +89,17 @@ class ProxyTool(BaseTool):
         ctrl = ttk.Frame(f)
         ctrl.pack(fill="x", padx=6, pady=6)
         self.toggle_btn = ttk.Button(ctrl, text="启动代理",
+                                     style="Accent.TButton",
                                      command=self._toggle)
-        self.toggle_btn.pack(side="left", padx=4)
+        self.toggle_btn.pack(side="left", padx=(0, 8))
         ttk.Button(ctrl, text="保存配置",
                    command=self._save_config).pack(side="left", padx=4)
         ttk.Button(ctrl, text="加载配置",
                    command=self._load_config).pack(side="left", padx=4)
         self.status_var = tk.StringVar(value="未启动")
-        ttk.Label(ctrl, textvariable=self.status_var,
-                  foreground="#b00020").pack(side="left", padx=12)
+        self.status_label = ttk.Label(ctrl, textvariable=self.status_var,
+                                      style="Muted.TLabel")
+        self.status_label.pack(side="left", padx=14)
 
         self._load_saved_config()
         self.frame = f
@@ -269,9 +271,11 @@ class ProxyTool(BaseTool):
         if not hasattr(self, "toggle_btn"):
             return
         if running:
-            self.toggle_btn.configure(text="停止代理")
-            self.status_var.set("运行中 ✔  http://%s:%d" % (
+            self.toggle_btn.configure(text="停止代理", style="TButton")
+            self.status_label.configure(style="Ok.TLabel")
+            self.status_var.set("运行中  http://%s:%d" % (
                 self.config.listen_host, self.config.listen_port))
         else:
-            self.toggle_btn.configure(text="启动代理")
+            self.toggle_btn.configure(text="启动代理", style="Accent.TButton")
+            self.status_label.configure(style="Muted.TLabel")
             self.status_var.set("未启动")

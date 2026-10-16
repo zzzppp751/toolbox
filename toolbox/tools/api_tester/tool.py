@@ -11,6 +11,7 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter.scrolledtext import ScrolledText
 
+from core import theme
 from core.base import BaseTool
 
 from . import client
@@ -39,7 +40,8 @@ class ApiTesterTool(BaseTool):
         self.url_var = tk.StringVar()
         ttk.Entry(bar, textvariable=self.url_var).pack(
             side="left", fill="x", expand=True, padx=6)
-        self.send_btn = ttk.Button(bar, text="发送", command=self._send)
+        self.send_btn = ttk.Button(bar, text="发送", style="Accent.TButton",
+                                   command=self._send)
         self.send_btn.pack(side="left")
 
         opts = ttk.Frame(f)
@@ -62,11 +64,13 @@ class ApiTesterTool(BaseTool):
         ttk.Label(reqf, text="请求头（每行一个 Key: Value，例如 "
                             "Authorization: Bearer xxx）").pack(
             anchor="w", padx=6, pady=(6, 0))
-        self.headers_text = ScrolledText(reqf, height=5)
+        self.headers_text = ScrolledText(reqf, height=4)
+        theme.style_text(self.headers_text, mono=True)
         self.headers_text.pack(fill="x", padx=6)
         ttk.Label(reqf, text="请求体（POST / PUT / PATCH 时使用）").pack(
             anchor="w", padx=6, pady=(6, 0))
-        self.body_text = ScrolledText(reqf, height=9)
+        self.body_text = ScrolledText(reqf, height=7)
+        theme.style_text(self.body_text, mono=True)
         self.body_text.pack(fill="both", expand=True, padx=6, pady=(0, 6))
 
         respf = ttk.Frame(nb)
@@ -74,7 +78,8 @@ class ApiTesterTool(BaseTool):
         self.status_var = tk.StringVar(value="填写 URL 后点「发送」")
         ttk.Label(respf, textvariable=self.status_var).pack(
             anchor="w", padx=6, pady=6)
-        self.resp_text = ScrolledText(respf, height=16)
+        self.resp_text = ScrolledText(respf, height=14)
+        theme.style_text(self.resp_text, mono=True)
         self.resp_text.pack(fill="both", expand=True, padx=6, pady=(0, 6))
 
         self.frame = f

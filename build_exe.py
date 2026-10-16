@@ -21,6 +21,8 @@ import sys
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 TOOLBOX_DIR = os.path.join(ROOT, "toolbox")
+ASSETS_DIR = os.path.join(TOOLBOX_DIR, "assets")
+ICON_FILE = os.path.join(ASSETS_DIR, "icon.ico")
 
 
 def read_tool_modules():
@@ -55,9 +57,20 @@ def main():
     ]
     for modname in modules:
         cmd += ["--hidden-import", "tools.%s" % modname]
+
+    # exe 图标
+    if os.path.exists(ICON_FILE):
+        cmd += ["--icon", ICON_FILE]
+    # 图标资源随包分发（运行时通过 resource_path 读取）
+    for name in ("icon.ico", "icon.png"):
+        path = os.path.join(ASSETS_DIR, name)
+        if os.path.exists(path):
+            cmd += ["--add-data", "%s%sassets" % (path, os.pathsep)]
+
     cmd.append(os.path.join(TOOLBOX_DIR, "main.py"))
 
     print("工具清单 : %s" % (", ".join(modules) or "(空)"))
+    print("应用图标 : %s" % (ICON_FILE if os.path.exists(ICON_FILE) else "无"))
     print("输出     : dist/%s.exe" % args.name)
     print("执行命令 : %s" % " ".join(cmd))
     print("-" * 60)
