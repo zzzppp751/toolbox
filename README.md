@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="toolbox/assets/icon.png" width="104" alt="工具箱图标">
+</p>
+
 # 工具箱（Toolbox）
 
 一个用 Python + Tkinter 写的本地工具箱，采用**插件式架构**：主程序只负责左侧功能列表、右侧面板和底部日志，具体功能以插件形式放在 `tools/` 目录下，**丢进去就自动被发现**，无需改动主程序。
@@ -8,6 +12,8 @@
 - **接口调试器** —— mini Postman，发请求、看状态码与 JSON 响应
 - **JSON 工具** —— 格式化 / 压缩 / 校验 / 转义 / 去转义
 - **时间戳转换** —— 时间戳与时间互转
+
+![工具箱界面](toolbox/assets/screenshot.png)
 
 ## 特性
 
