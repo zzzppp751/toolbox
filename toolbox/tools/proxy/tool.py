@@ -52,8 +52,9 @@ class ProxyTool(BaseTool):
                                  show="headings", height=5)
         self.tree.heading("local", text="本地路径前缀")
         self.tree.heading("upstream", text="上游地址")
-        self.tree.column("local", width=150, anchor="w")
-        self.tree.column("upstream", width=430, anchor="w")
+        self.tree.column("local", width=130, anchor="w", minwidth=90)
+        self.tree.column("upstream", width=380, anchor="w", minwidth=160,
+                          stretch=True)
         self.tree.grid(row=0, column=0, columnspan=4, sticky="nsew",
                        padx=6, pady=4)
         rules.rowconfigure(0, weight=1)

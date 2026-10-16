@@ -64,12 +64,12 @@ class ApiTesterTool(BaseTool):
         ttk.Label(reqf, text="请求头（每行一个 Key: Value，例如 "
                             "Authorization: Bearer xxx）").pack(
             anchor="w", padx=6, pady=(6, 0))
-        self.headers_text = ScrolledText(reqf, height=4)
+        self.headers_text = ScrolledText(reqf, height=4, width=1)
         theme.style_text(self.headers_text, mono=True)
         self.headers_text.pack(fill="x", padx=6)
         ttk.Label(reqf, text="请求体（POST / PUT / PATCH 时使用）").pack(
             anchor="w", padx=6, pady=(6, 0))
-        self.body_text = ScrolledText(reqf, height=7)
+        self.body_text = ScrolledText(reqf, height=7, width=1)
         theme.style_text(self.body_text, mono=True)
         self.body_text.pack(fill="both", expand=True, padx=6, pady=(0, 6))
 
@@ -78,7 +78,7 @@ class ApiTesterTool(BaseTool):
         self.status_var = tk.StringVar(value="填写 URL 后点「发送」")
         ttk.Label(respf, textvariable=self.status_var).pack(
             anchor="w", padx=6, pady=6)
-        self.resp_text = ScrolledText(respf, height=14)
+        self.resp_text = ScrolledText(respf, height=14, width=1)
         theme.style_text(self.resp_text, mono=True)
         self.resp_text.pack(fill="both", expand=True, padx=6, pady=(0, 6))
 

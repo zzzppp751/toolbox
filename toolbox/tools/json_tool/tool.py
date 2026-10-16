@@ -40,7 +40,7 @@ class JsonTool(BaseTool):
 
         in_frame = ttk.LabelFrame(f, text="输入")
         in_frame.pack(fill="both", expand=True, padx=6, pady=(0, 6))
-        self.input_text = ScrolledText(in_frame, height=7)
+        self.input_text = ScrolledText(in_frame, height=7, width=1)
         theme.style_text(self.input_text, mono=True)
         self.input_text.pack(fill="both", expand=True, padx=4, pady=4)
 
@@ -57,7 +57,7 @@ class JsonTool(BaseTool):
 
         out_frame = ttk.LabelFrame(f, text="输出")
         out_frame.pack(fill="both", expand=True, padx=6, pady=6)
-        self.output_text = ScrolledText(out_frame, height=7)
+        self.output_text = ScrolledText(out_frame, height=7, width=1)
         theme.style_text(self.output_text, mono=True)
         self.output_text.pack(fill="both", expand=True, padx=4, pady=4)
 

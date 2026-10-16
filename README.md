@@ -28,7 +28,7 @@
 
 ```
 toolbox/
-├─ main.py                     主程序：品牌区 + 功能列表 + 面板 + 共享日志
+├─ main.py                     主程序：功能列表 + 面板 + 共享日志
 ├─ run_toolbox.bat             双击启动（Windows）
 ├─ assets/                     图标资源
 │  ├─ icon.ico / icon.png      应用图标（窗口 / 任务栏 / exe）

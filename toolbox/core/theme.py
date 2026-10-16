@@ -10,17 +10,17 @@ from tkinter import ttk
 
 # ---------------- 配色 ----------------
 BG = "#FFFFFF"          # 内容区底色
-SIDEBAR = "#F5F7FA"     # 侧栏底色
-LOG_BG = "#FAFBFC"      # 日志区底色
-BORDER = "#E9ECF1"
-BORDER_2 = "#D9DEE7"
-TEXT = "#1F2430"
-TEXT_SUB = "#6B7480"
+SIDEBAR = "#FAFAFA"     # 侧栏底色（接近白，靠一条细线跟内容区分开）
+LOG_BG = "#FFFFFF"      # 日志区底色
+BORDER = "#E8E8E8"
+BORDER_2 = "#DCDCDC"
+TEXT = "#111111"        # 主文字：近黑
+TEXT_SUB = "#4D4D4D"    # 次要文字
 ACCENT = "#2F6FED"
 ACCENT_D = "#2458C8"
 SEL_BG = "#2F6FED"
-HOVER = "#EDF1F7"
-OK = "#1A7F37"
+HOVER = "#F0F0F0"
+OK = "#0F7B2F"
 WARN = "#C0392B"
 
 # ---------------- 字体 ----------------
@@ -63,7 +63,9 @@ def apply(root):
                     font=FONT_S)
 
     # 按钮：默认描边款
-    style.configure("TButton", background="#FFFFFF", foreground=TEXT,
+    # width=0 很关键：clam 主题默认给按钮 -11（最少 11 个字符宽 ≈ 118px），
+    # 会让整排工具栏被撑爆，按钮也不再随文字长短取宽。
+    style.configure("TButton", width=0, background="#FFFFFF", foreground=TEXT,
                     bordercolor=BORDER_2, focuscolor=BG, relief="flat",
                     padding=(12, 6), borderwidth=1)
     style.map("TButton",
@@ -71,7 +73,8 @@ def apply(root):
               bordercolor=[("active", ACCENT)])
 
     # 主操作按钮：实心强调色
-    style.configure("Accent.TButton", background=ACCENT, foreground="#FFFFFF",
+    style.configure("Accent.TButton", width=0, background=ACCENT,
+                    foreground="#FFFFFF",
                     bordercolor=ACCENT, focuscolor=ACCENT, relief="flat",
                     padding=(14, 7), borderwidth=1)
     style.map("Accent.TButton",

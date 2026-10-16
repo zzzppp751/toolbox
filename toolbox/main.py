@@ -4,8 +4,8 @@
 
 布局：
   ┌───────────┬──────────────────────────────┐
-  │ 品牌区     │  当前工具标题 + 说明           │
-  │ 功能列表   ├──────────────────────────────┤
+  │ 功能列表   │  当前工具标题 + 说明           │
+  │           ├──────────────────────────────┤
   │           │  当前工具面板                  │
   ├───────────┴──────────────────────────────┤  ← 分界线可拖动
   │ 运行日志（可清空）                         │
@@ -16,6 +16,7 @@
 
 import os
 import queue
+import sys
 import time
 import tkinter as tk
 from tkinter import ttk
@@ -26,9 +27,8 @@ from core.base import ToolContext, resource_path
 from core.registry import discover_tools
 
 APP_TITLE = "工具箱"
-APP_SUBTITLE = "本地开发小工具集"
 
-SIDEBAR_W = 208
+SIDEBAR_W = 196
 LOG_PREF_H = 152        # 日志区理想高度
 LOG_MIN_H = 78          # 日志区最小高度，其余都给工具面板
 
@@ -38,10 +38,9 @@ class ToolboxApp:
         self.root = root
         self.root.title(APP_TITLE)
         self.root.geometry("1020x800")
-        self.root.minsize(880, 640)
+        self.root.minsize(900, 660)
 
         theme.apply(root)
-        self._set_window_icon()
 
         self.log_queue = queue.Queue()
         self.context = ToolContext(root, self.log_queue)
@@ -50,9 +49,9 @@ class ToolboxApp:
         self.frames = {}
         self.current = None
         self._sidebar_labels = None
-        self._logo_photo = None
 
         self._build_ui()
+        self._set_window_icon()
         self._load_tools()
 
         self.root.protocol("WM_DELETE_WINDOW", self._on_close)
@@ -63,6 +62,14 @@ class ToolboxApp:
     # ---------------- 窗口图标 ----------------
     def _set_window_icon(self):
         ico = resource_path(os.path.join("assets", "icon.ico"))
+        if sys.platform == "win32" and os.path.exists(ico):
+            try:
+                self.root.update_idletasks()
+            except Exception:
+                pass
+            if self._win_set_icon(ico):
+                return          # Windows 下装好了就不再用 Tk 那套覆盖
+
         if os.path.exists(ico):
             try:
                 self.root.iconbitmap(ico)
@@ -77,20 +84,44 @@ class ToolboxApp:
             except Exception:
                 pass
 
-    def _load_logo(self, size=40):
-        """把 assets/icon.png 缩到侧栏用的小图标（PhotoImage 只能整数倍缩小）。"""
-        png = resource_path(os.path.join("assets", "icon.png"))
-        if not os.path.exists(png):
-            return None
+    def _win_set_icon(self, ico):
+        """Windows：按系统要求的大小，从多尺寸 ico 里各取一张装上。
+
+        Tk 自带的 iconbitmap 只装一个大图标，任务栏和资源管理器再自己缩，
+        小尺寸就糊了。这里显式给 ICON_SMALL / ICON_BIG 各装一张合身的。
+        """
         try:
-            photo = tk.PhotoImage(file=png)
+            import ctypes
+            from ctypes import wintypes as wt
+
+            u32 = ctypes.windll.user32
+            u32.GetSystemMetrics.restype = ctypes.c_int
+            u32.LoadImageW.restype = wt.HANDLE
+            u32.LoadImageW.argtypes = [wt.HINSTANCE, wt.LPCWSTR, wt.UINT,
+                                       ctypes.c_int, ctypes.c_int, wt.UINT]
+            u32.SendMessageW.argtypes = [wt.HWND, wt.UINT, wt.WPARAM,
+                                         wt.LPARAM]
+
+            IMAGE_ICON, LR_LOADFROMFILE = 1, 0x0010
+            WM_SETICON, ICON_SMALL, ICON_BIG = 0x0080, 0, 1
+
+            hwnd = int(self.root.frame(), 0)    # Tk 顶层窗口句柄（0x 开头）
+
+            handles = []
+            for metric_w, metric_h, which in ((49, 50, ICON_SMALL),
+                                              (11, 12, ICON_BIG)):
+                cx = u32.GetSystemMetrics(metric_w)     # SM_CXSMICON / SM_CXICON
+                cy = u32.GetSystemMetrics(metric_h)
+                handle = u32.LoadImageW(None, str(ico), IMAGE_ICON, cx, cy,
+                                        LR_LOADFROMFILE)
+                if handle:
+                    u32.SendMessageW(hwnd, WM_SETICON, which, handle)
+                    handles.append(handle)
+
+            self._icon_handles = handles        # 留住句柄，别被回收
+            return bool(handles)
         except Exception:
-            return None
-        factor = max(1, round(photo.width() / float(size)))
-        if factor > 1:
-            photo = photo.subsample(factor, factor)
-        self._logo_photo = photo        # 防止被回收
-        return photo
+            return False
 
     # ---------------- 界面 ----------------
     def _build_ui(self):
@@ -115,35 +146,23 @@ class ToolboxApp:
         self.paned.add(body, weight=1)
 
         side = tk.Frame(body, bg=theme.SIDEBAR, width=SIDEBAR_W)
-        side.pack(side="left", fill="y", padx=(0, 12))
+        side.pack(side="left", fill="y")
         side.pack_propagate(False)
 
-        brand = tk.Frame(side, bg=theme.SIDEBAR)
-        brand.pack(fill="x", padx=14, pady=(14, 10))
-        logo = self._load_logo(40)
-        if logo is not None:
-            tk.Label(brand, image=logo, bg=theme.SIDEBAR,
-                     borderwidth=0).pack(side="left")
-        btext = tk.Frame(brand, bg=theme.SIDEBAR)
-        btext.pack(side="left", padx=(9, 0))
-        tk.Label(btext, text=APP_TITLE, bg=theme.SIDEBAR, fg=theme.TEXT,
-                 font=(theme.FAMILY, 12, "bold")).pack(anchor="w")
-        tk.Label(btext, text=APP_SUBTITLE, bg=theme.SIDEBAR,
-                 fg=theme.TEXT_SUB, font=theme.FONT_S).pack(anchor="w")
-
-        tk.Frame(side, bg=theme.BORDER, height=1).pack(fill="x", padx=10)
-
         tk.Label(side, text="功  能", bg=theme.SIDEBAR, fg=theme.TEXT_SUB,
-                 font=theme.FONT_S).pack(anchor="w", padx=14, pady=(10, 4))
+                 font=theme.FONT_S).pack(anchor="w", padx=16, pady=(14, 6))
 
         self.tree = ttk.Treeview(side, style="Side.Treeview", show="tree",
                                  selectmode="browse")
-        self.tree.pack(fill="both", expand=True, padx=4, pady=(0, 8))
+        self.tree.pack(fill="both", expand=True, padx=5, pady=(0, 8))
         self.tree.bind("<<TreeviewSelect>>", self._on_select)
         self.tree.bind("<Double-1>", lambda e: "break")
 
+        # 侧栏与内容之间的一条细线
+        tk.Frame(body, bg=theme.BORDER, width=1).pack(side="left", fill="y")
+
         right = tk.Frame(body, bg=theme.BG)
-        right.pack(side="left", fill="both", expand=True)
+        right.pack(side="left", fill="both", expand=True, padx=(18, 0))
 
         self.header = header = tk.Frame(right, bg=theme.BG)
         header.pack(fill="x")
@@ -170,7 +189,7 @@ class ToolboxApp:
         ttk.Button(head, text="清空", width=6,
                    command=self._clear_log).pack(side="right")
 
-        self.log_text = ScrolledText(logf, height=6, state="disabled",
+        self.log_text = ScrolledText(logf, height=6, width=1, state="disabled",
                                      wrap="word")
         theme.style_text(self.log_text, mono=True)
         self.log_text.pack(fill="both", expand=True)
