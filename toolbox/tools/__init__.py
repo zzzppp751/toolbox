@@ -13,4 +13,9 @@
   登记之后，用仓库根目录的 build_exe.py 打包即可，会自动带上。
 """
 
-TOOL_MODULES = ["proxy"]
+TOOL_MODULES = [
+    "proxy",        # 本地反向代理
+    "api_tester",   # 接口调试器
+    "json_tool",    # JSON 工具
+    "timestamp",    # 时间戳转换
+]
